@@ -1,0 +1,98 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit {{ movie.title }} | CiNiMe</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body class="edit-body">
+    <main class="edit-page">
+        <header class="edit-header">
+            <h1>EDIT TITLE DETAILS</h1>
+            <p>MAKE CHANGES TO {{ movie.title }}.</p>
+        </header>
+
+        <form class="add-form" method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="edit-actions">
+                <button type="submit">Save Changes</button>
+                <a class="back-button" href="{% url 'index' %}">Cancel</a>
+            </div>
+        </form>
+        <div class="delete-form">
+            <button type="button" class="delete-button" id="deleteTitleButton">
+                <span aria-hidden="true">♲</span> Delete Title
+            </button>
+        </div>
+    </main>
+
+    <div class="delete-dialog-overlay" id="deleteDialog" aria-hidden="true">
+        <div class="delete-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteDialogTitle" tabindex="-1">
+            <div class="delete-dialog-icon" aria-hidden="true">!</div>
+            <h2 id="deleteDialogTitle">Delete this title?</h2>
+            <p><strong>{{ movie.title }}</strong> will be permanently removed from your collection.</p>
+            <div class="delete-dialog-actions">
+                <button type="button" class="delete-cancel" id="cancelDelete">Keep Title</button>
+                <form method="POST" action="{% url 'delete' movie.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-confirm">Yes, Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusInput = document.getElementById("id_status");
+        const ratingInput = document.getElementById("id_rating");
+        const ratingField = ratingInput.closest("p");
+        const deleteDialog = document.getElementById("deleteDialog");
+
+        function updateRatingVisibility() {
+            const showRating = statusInput.value !== "Plan to Watch";
+            ratingField.hidden = !showRating;
+
+            if (!showRating) {
+                ratingInput.value = "";
+            }
+        }
+
+        statusInput.addEventListener("change", updateRatingVisibility);
+        updateRatingVisibility();
+
+        document.getElementById("deleteTitleButton").addEventListener("click", () => {
+            deleteDialog.classList.add("is-open");
+            deleteDialog.setAttribute("aria-hidden", "false");
+            deleteDialog.querySelector(".delete-dialog").focus();
+        });
+
+        document.getElementById("cancelDelete").addEventListener("click", () => {
+            closeDeleteDialog();
+        });
+
+        function closeDeleteDialog() {
+            deleteDialog.classList.remove("is-open");
+            deleteDialog.setAttribute("aria-hidden", "true");
+            document.getElementById("deleteTitleButton").focus();
+        }
+
+        deleteDialog.addEventListener("click", event => {
+            if (event.target === deleteDialog) {
+                closeDeleteDialog();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && deleteDialog.classList.contains("is-open")) {
+                closeDeleteDialog();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CiNiMe | Login</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-box">
+
+            <div class="logo">
+                Ci<span>Ni</span>Me
+            </div>
+
+            <h2>
+                Welcome Back
+            </h2>
+
+            <p class="login-subtitle">
+                Login to your CiNiMe account
+            </p>
+
+
+            {% if form.errors %}
+
+            <div class="login-error">
+                Invalid username or password. Please try again.
+            </div>
+
+            {% endif %}
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <div class="form-group">
+
+                    <label for="id_username">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        name="username"
+                        id="id_username"
+                        placeholder="Enter your username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="id_password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        id="id_password"
+                        placeholder="Enter your password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Login
+                </button>
+
+            </form>
+
+
+            <p class="signup-text">
+
+                Don't have an account?
+
+                <a href="{% url 'signup' %}">
+                    Sign Up
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,789 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CiNiMe | Movie, Anime & Series Collection</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVIGATION
+         ========================= -->
+
+    <header>
+
+        <div class="logo">
+            Ci<span>Ni</span>Me
+        </div>
+
+        <nav>
+
+            <a href="#"
+               class="active"
+               onclick="showHome(); return false;">
+                Home
+            </a>
+
+            <a href="#"
+               onclick="showCollection(); return false;">
+                Collection
+            </a>
+
+            <a href="#"
+               onclick="showAdd(); return false;">
+                Add Title
+            </a>
+
+            <a href="#"
+               onclick="showAbout(); return false;">
+                About
+            </a>
+
+            {% if user.is_authenticated %}
+
+                <span class="nav-user">
+                    Hi, {{ user.username }}!
+                </span>
+
+                <form method="POST"
+                      action="{% url 'logout' %}"
+                      class="logout-form">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="logout-button">
+                        Logout
+                    </button>
+
+                </form>
+
+            {% else %}
+
+                <a href="{% url 'login' %}">
+                    Login
+                </a>
+
+                <a href="{% url 'signup' %}">
+                    Sign Up
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </header>
+
+
+    <!-- =========================
+         HOME
+         ========================= -->
+
+    <div id="home">
+
+        <!-- Hero -->
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <h1>
+                    Welcome to <span>CiNiMe</span>
+                </h1>
+
+                <p>
+                    Your personal collection system for movies, anime,
+                    dramas, and series. Organize what you have watched,
+                    what you're currently watching, and what you plan
+                    to watch.
+                </p>
+
+                <a href="#"
+                   class="btn"
+                   onclick="showAdd(); return false;">
+                    + Add New Title
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Main -->
+
+        <main>
+
+            <!-- My Collection -->
+
+            <div class="section-title">
+
+                <h2>
+                    My Collection
+                </h2>
+
+                <p>
+                    Keep track of your favorite movies, anime, and series.
+                </p>
+
+            </div>
+
+
+            <!-- Statistics -->
+
+            <section class="stats">
+
+                <div class="stat-card">
+
+                    <h3>
+                        Total Titles
+                    </h3>
+
+                    <div class="number">
+                        {{ total_titles }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        Completed
+                    </h3>
+
+                    <div class="number">
+                        {{ completed_count }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        Currently Watching
+                    </h3>
+
+                    <div class="number">
+                        {{ watching_count }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        Plan to Watch
+                    </h3>
+
+                    <div class="number">
+                        {{ plan_count }}
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Search / Filters -->
+
+            <section class="filters">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search title..."
+                >
+
+
+                <select id="typeFilter">
+
+                    <option value="">
+                        All Types
+                    </option>
+
+                    <option value="Movie">
+                        Movie
+                    </option>
+
+                    <option value="Anime">
+                        Anime
+                    </option>
+
+                    <option value="Series">
+                        Series
+                    </option>
+
+                    <option value="Drama">
+                        Drama
+                    </option>
+
+                </select>
+
+
+                <select id="genreFilter">
+
+                    <option value="">
+                        All Genres
+                    </option>
+
+                    <option value="Action">
+                        Action
+                    </option>
+
+                    <option value="Comedy">
+                        Comedy
+                    </option>
+
+                    <option value="Drama">
+                        Drama
+                    </option>
+
+                    <option value="Romance">
+                        Romance
+                    </option>
+
+                    <option value="Fantasy">
+                        Fantasy
+                    </option>
+
+                    <option value="Horror">
+                        Horror
+                    </option>
+
+                </select>
+
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="Plan to Watch">
+                        Plan to Watch
+                    </option>
+
+                    <option value="Watching">
+                        Watching
+                    </option>
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                </select>
+
+            </section>
+
+
+            <!-- =========================
+                 TITLES
+                 ========================= -->
+
+            <section class="collection" id="homeCollection">
+
+                {% for movie in movies %}
+
+                <article
+                    class="card"
+                    data-title="{{ movie.title|lower }}"
+                    data-type="{{ movie.type }}"
+                    data-genre="{{ movie.genre }}"
+                    data-status="{{ movie.status }}"
+                >
+
+                    <div class="poster">
+                        🎬
+                    </div>
+
+
+                    <div class="card-content">
+
+                        <span class="type">
+                            {{ movie.type }}
+                        </span>
+
+
+                        <h3>
+                            <a href="{% url 'edit' movie.pk %}" class="title-link">
+                                {{ movie.title }}
+                            </a>
+                        </h3>
+
+
+                        <div class="card-info">
+
+                            Genre:
+                            {{ movie.genre }}
+
+                            <br>
+
+                            Country:
+                            {{ movie.country }}
+
+                            <br>
+
+                            Release Year:
+                            {{ movie.release_year }}
+
+                            {% if movie.type != "Movie" and movie.episodes > 0 %}
+
+                                <br>
+
+                                Episodes:
+                                {{ movie.episodes }}
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if movie.rating is not None %}
+                            <div class="rating">
+                                ★ {{ movie.rating }}/10
+                            </div>
+                        {% endif %}
+
+
+                        <div class="status">
+
+                            {% if movie.status == "Completed" %}
+
+                                ✓ Completed
+
+                            {% elif movie.status == "Watching" %}
+
+                                ● Watching
+
+                            {% else %}
+
+                                + Plan to Watch
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                {% empty %}
+
+                <p class="no-results">
+                    No titles have been added yet.
+                </p>
+
+                {% endfor %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================
+         COLLECTION PAGE
+         ========================= -->
+
+    <div id="collection" class="page-section">
+
+        <h2>
+            My Collection
+        </h2>
+
+
+        <section class="collection">
+
+            {% for movie in movies %}
+
+            <article class="card">
+
+                <div class="poster">
+                    🎬
+                </div>
+
+
+                <div class="card-content">
+
+                    <span class="type">
+                        {{ movie.type }}
+                    </span>
+
+
+                    <h3>
+                        <a href="{% url 'edit' movie.pk %}" class="title-link">
+                            {{ movie.title }}
+                        </a>
+                    </h3>
+
+
+                    <div class="card-info">
+
+                        Genre:
+                        {{ movie.genre }}
+
+                        <br>
+
+                        Country:
+                        {{ movie.country }}
+
+                        <br>
+
+                        Release Year:
+                        {{ movie.release_year }}
+
+                        {% if movie.type != "Movie" and movie.episodes > 0 %}
+
+                            <br>
+
+                            Episodes:
+                            {{ movie.episodes }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if movie.rating is not None %}
+                        <div class="rating">
+                            ★ {{ movie.rating }}/10
+                        </div>
+                    {% endif %}
+
+
+                    <div class="status">
+
+                        {% if movie.status == "Completed" %}
+
+                            ✓ Completed
+
+                        {% elif movie.status == "Watching" %}
+
+                            ● Watching
+
+                        {% else %}
+
+                            + Plan to Watch
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            {% empty %}
+
+            <p>
+                No titles have been added yet.
+            </p>
+
+            {% endfor %}
+
+        </section>
+
+    </div>
+
+
+    <!-- =========================
+         ADD TITLE
+         ========================= -->
+
+    <div id="add" class="page-section">
+
+        <h2>Add New Title</h2>
+
+
+        <form
+            class="add-form"
+            method="POST"
+            action="{% url 'add' %}"
+        >
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+
+            <button type="submit">
+                Add Title
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================
+         ABOUT
+         ========================= -->
+
+    <div id="about" class="page-section">
+
+        <h2>
+            About CiNiMe
+        </h2>
+
+
+        <p>
+            CiNiMe is a Movie, Anime & Series Collection System
+            designed to help users organize and manage their favorite
+            titles. You can keep track of movies, anime, dramas, and
+            series that you have completed, are currently watching,
+            or plan to watch.
+        </p>
+
+    </div>
+
+
+    <!-- =========================
+         FOOTER
+         ========================= -->
+
+    <footer>
+
+        <p>
+            © 2026 CiNiMe – Movie, Anime & Series Collection System
+        </p>
+
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+         ========================= -->
+
+    <script>
+
+        function hideSections() {
+
+            document.getElementById("home").style.display = "none";
+
+            document.getElementById("collection").style.display = "none";
+
+            document.getElementById("add").style.display = "none";
+
+            document.getElementById("about").style.display = "none";
+
+
+            document.querySelectorAll("nav a").forEach(link => {
+
+                link.classList.remove("active");
+
+            });
+
+        }
+
+
+        function showHome() {
+
+            hideSections();
+
+            document.getElementById("home").style.display = "block";
+
+            document.querySelectorAll("nav a")[0].classList.add("active");
+
+            window.scrollTo(0, 0);
+
+        }
+
+
+        function showCollection() {
+
+            hideSections();
+
+            document.getElementById("collection").style.display = "block";
+
+            document.querySelectorAll("nav a")[1].classList.add("active");
+
+            window.scrollTo(0, 0);
+
+        }
+
+
+        function showAdd() {
+
+            hideSections();
+
+            document.getElementById("add").style.display = "block";
+
+            document.querySelectorAll("nav a")[2].classList.add("active");
+
+            window.scrollTo(0, 0);
+
+        }
+
+
+        function showAbout() {
+
+            hideSections();
+
+            document.getElementById("about").style.display = "block";
+
+            document.querySelectorAll("nav a")[3].classList.add("active");
+
+            window.scrollTo(0, 0);
+
+        }
+
+
+        /* =========================
+           SEARCH AND FILTERS
+           ========================= */
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const typeFilter =
+            document.getElementById("typeFilter");
+
+        const genreFilter =
+            document.getElementById("genreFilter");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+
+        function filterCollection() {
+
+            const search =
+                searchInput.value.toLowerCase();
+
+            const type =
+                typeFilter.value;
+
+            const genre =
+                genreFilter.value;
+
+            const status =
+                statusFilter.value;
+
+
+            const cards =
+                document.querySelectorAll(
+                    "#homeCollection .card"
+                );
+
+
+            cards.forEach(card => {
+
+                const title =
+                    card.dataset.title;
+
+                const cardType =
+                    card.dataset.type;
+
+                const cardGenre =
+                    card.dataset.genre;
+
+                const cardStatus =
+                    card.dataset.status;
+
+
+                const matchesSearch =
+                    title.includes(search);
+
+                const matchesType =
+                    type === "" ||
+                    cardType === type;
+
+                const matchesGenre =
+                    genre === "" ||
+                    cardGenre === genre;
+
+                const matchesStatus =
+                    status === "" ||
+                    cardStatus === status;
+
+
+                if (
+                    matchesSearch &&
+                    matchesType &&
+                    matchesGenre &&
+                    matchesStatus
+                ) {
+
+                    card.style.display = "";
+
+                } else {
+
+                    card.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterCollection
+        );
+
+
+        typeFilter.addEventListener(
+            "change",
+            filterCollection
+        );
+
+
+        genreFilter.addEventListener(
+            "change",
+            filterCollection
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterCollection
+        );
+
+        const typeInput = document.getElementById("id_type");
+        const statusInput = document.getElementById("id_status");
+        const episodesInput = document.getElementById("id_episodes");
+        const ratingInput = document.getElementById("id_rating");
+
+        function updateConditionalFields() {
+            const episodesField = episodesInput.closest("p");
+            const showEpisodes = typeInput.value !== "Movie";
+            const showRating = statusInput.value !== "Plan to Watch";
+
+            episodesField.hidden = !showEpisodes;
+            ratingInput.closest("p").hidden = !showRating;
+
+            if (!showEpisodes) {
+                episodesInput.value = "0";
+            }
+
+            if (!showRating) {
+                ratingInput.value = "";
+            }
+        }
+
+        typeInput.addEventListener("change", updateConditionalFields);
+        statusInput.addEventListener("change", updateConditionalFields);
+        updateConditionalFields();
+
+        {% if form.errors %}
+        showAdd();
+        {% endif %}
+
+    </script>
+
+</body>
+
+</html>
